@@ -15,12 +15,14 @@ interface DoctorScreenProps {
   doctors: Doctor[];
   onRefreshAll: () => void;
   waitingCount: number;
+  serverError: string | null;
 }
 
 export const DoctorScreen: React.FC<DoctorScreenProps> = ({
   doctors,
   onRefreshAll,
   waitingCount,
+  serverError,
 }) => {
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>('D1');
   const [actionLoading, setActionLoading] = useState<boolean>(false);
@@ -170,6 +172,24 @@ export const DoctorScreen: React.FC<DoctorScreenProps> = ({
           })}
         </div>
       </div>
+
+      {/* Server Disconnection Warning */}
+      {serverError && (
+        <div style={{
+          background: 'rgba(239, 68, 68, 0.15)',
+          border: '1px solid rgba(239, 68, 68, 0.4)',
+          color: '#fca5a5',
+          padding: '0.85rem 1rem',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.75rem',
+          fontSize: '0.9rem',
+        }}>
+          <AlertTriangle size={20} style={{ flexShrink: 0 }} />
+          <span>Server offline: {serverError}</span>
+        </div>
+      )}
 
       {/* Notifications */}
       {errorNotice && (

@@ -76,6 +76,7 @@ export const App: React.FC = () => {
             doctors={doctors}
             onRefreshAll={() => fetchStatus(false)}
             waitingCount={waitingCount}
+            serverError={serverError}
           />
         )}
 

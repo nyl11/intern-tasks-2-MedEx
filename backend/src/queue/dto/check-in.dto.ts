@@ -9,6 +9,7 @@ import {
   Min,
   ValidateIf,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { PatientKind } from '../queue.types';
 
 export class CreateCheckInDto {
@@ -16,6 +17,7 @@ export class CreateCheckInDto {
   @IsNotEmpty({ message: 'Patient name is required' })
   name: string;
 
+  @Type(() => Number)
   @IsInt({ message: 'Age must be an integer' })
   @Min(0, { message: 'Age must be at least 0' })
   @Max(120, { message: 'Age must be at most 120' })

@@ -50,6 +50,8 @@ coverage/
 *.sln
 *.sw?
 
-# Exclude other take-home tasks from the repository
-interns taks/task_one/
-interns taks/task_three/
+# Exclude intern tasks directory and scratch files from the repository
+interns taks/
+interns tasks/
+interns_tasks/
+scratch/

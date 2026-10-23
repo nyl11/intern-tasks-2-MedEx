@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsISO8601,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -29,6 +30,7 @@ export class CreateCheckInDto {
   @ValidateIf((o) => o.kind === 'appointment')
   @IsNotEmpty({ message: 'An appointment needs appointmentTime' })
   @IsString({ message: 'appointmentTime must be an ISO date string' })
+  @IsISO8601({ strict: true }, { message: 'appointmentTime must be a valid ISO 8601 date' })
   appointmentTime?: string;
 
   @IsOptional()

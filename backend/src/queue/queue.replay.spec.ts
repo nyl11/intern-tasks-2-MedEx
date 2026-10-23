@@ -26,7 +26,9 @@ describe('Bodhi Family Clinic - Queue Engine & Clinic.json Replay Suite', () => 
       const data = JSON.parse(rawData);
 
       const clinicConfig = data.clinic;
-      const example = data.examples[0];
+      expect(data.examples.length).toBeGreaterThan(0);
+
+      for (const example of data.examples) {
 
       const queueEngine = new QueueEngine({
         averageConsultationMinutes: clinicConfig.averageConsultationMinutes,
@@ -74,6 +76,7 @@ describe('Bodhi Family Clinic - Queue Engine & Clinic.json Replay Suite', () => 
       for (let i = 0; i < capturedSnapshots.length; i++) {
         expect(capturedSnapshots[i].at).toBe(example.expected.queueSnapshots[i].at);
         expect(capturedSnapshots[i].queue).toEqual(example.expected.queueSnapshots[i].queue);
+      }
       }
     });
   });

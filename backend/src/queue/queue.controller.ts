@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  ForbiddenException,
   Get,
   HttpCode,
   HttpStatus,
@@ -94,6 +95,9 @@ export class QueueController {
   @Post('reset')
   @HttpCode(HttpStatus.OK)
   reset(): { success: boolean; message: string } {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException('Reset is disabled in production.');
+    }
     return this.queueService.reset();
   }
 }

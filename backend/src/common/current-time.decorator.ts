@@ -12,7 +12,11 @@ export const CurrentTime = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
     const xNowHeader = request.headers['x-now'] || request.headers['X-Now'];
 
-    if (xNowHeader && typeof xNowHeader === 'string') {
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      xNowHeader &&
+      typeof xNowHeader === 'string'
+    ) {
       const parsed = DateTime.fromISO(xNowHeader.trim(), { setZone: true });
       if (parsed.isValid) {
         return parsed.setZone(CLINIC_TIMEZONE).toISO()!;

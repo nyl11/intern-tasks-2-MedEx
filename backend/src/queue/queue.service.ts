@@ -1,4 +1,5 @@
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import * as fs from 'fs';
 import * as path from 'path';
 import { QueueEngine } from './queue.engine';
 import { QueueStore } from './queue.store';
@@ -55,6 +56,49 @@ export class QueueService implements OnModuleDestroy {
   public reset(): { success: boolean; message: string } {
     this.engine.reset();
     return { success: true, message: 'Queue and doctor state have been reset.' };
+  }
+
+  public replay(untilTime?: string): { success: boolean; message: string; count: number } {
+    const clinicJsonPaths = [
+      path.resolve(__dirname, '../../../data/clinic.json'),
+      path.resolve(__dirname, '../../../../data/clinic.json'),
+      path.resolve(__dirname, '../../data/clinic.json'),
+    ];
+    const foundPath = clinicJsonPaths.find((p: string) => fs.existsSync(p));
+    if (!foundPath) {
+      throw new Error('clinic.json file not found');
+    }
+    const data = JSON.parse(fs.readFileSync(foundPath, 'utf-8'));
+    this.engine.reset();
+    let count = 0;
+    if (data.examples && data.examples.length > 0) {
+      for (const event of data.examples[0].events) {
+        if (untilTime && event.at > untilTime) break;
+        switch (event.type) {
+          case 'check_in':
+            this.engine.checkIn(event.patient, event.at);
+            count++;
+            break;
+          case 'call_next':
+            this.engine.callNext(event.doctorId, event.at);
+            count++;
+            break;
+          case 'done':
+            this.engine.done(event.doctorId);
+            count++;
+            break;
+          case 'no_show':
+            this.engine.noShow(event.doctorId, event.at);
+            count++;
+            break;
+        }
+      }
+    }
+    return {
+      success: true,
+      message: `Replayed ${count} clinic events up to ${untilTime || 'full day'}.`,
+      count,
+    };
   }
 
   onModuleDestroy() {

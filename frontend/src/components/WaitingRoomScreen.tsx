@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Tv, Clock, WifiOff, Sparkles, Maximize2, Minimize2 } from 'lucide-react';
 import type { Doctor, QueueResponse } from '../types';
+import { api } from '../services/api';
 
 interface WaitingRoomScreenProps {
   queueData: QueueResponse | null;
@@ -63,7 +64,8 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
   // Clock in Asia/Kathmandu
   useEffect(() => {
     const updateTime = () => {
-      const now = new Date();
+      const simulated = api.getSimulatedTime();
+      const now = simulated ? new Date(simulated) : new Date();
       const timeFmt = new Intl.DateTimeFormat('en-US', {
         timeZone: 'Asia/Kathmandu',
         hour: '2-digit',
@@ -118,8 +120,10 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
       {/* TV Header */}
       <div style={{
         display: 'flex',
+        flexWrap: 'wrap',
         justifyContent: 'space-between',
         alignItems: 'center',
+        gap: '1.25rem',
         borderBottom: '2px solid var(--border-color)',
         paddingBottom: '1.25rem',
       }}>

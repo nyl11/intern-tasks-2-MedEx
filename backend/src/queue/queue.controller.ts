@@ -100,4 +100,17 @@ export class QueueController {
     }
     return this.queueService.reset();
   }
+
+  /**
+   * POST /api/replay
+   * Replays clinic.json events up to a given time or X-Now.
+   */
+  @Post('replay')
+  @HttpCode(HttpStatus.OK)
+  replay(
+    @Body('until') until?: string,
+    @CurrentTime() currentTime?: string,
+  ): { success: boolean; message: string; count: number } {
+    return this.queueService.replay(until || currentTime);
+  }
 }

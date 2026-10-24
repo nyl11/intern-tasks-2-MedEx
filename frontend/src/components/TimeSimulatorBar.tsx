@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, RotateCcw, Play, CheckCircle2 } from 'lucide-react';
+import { Clock, RotateCcw, Play, CheckCircle2, Zap } from 'lucide-react';
 import { api } from '../services/api';
 
 interface TimeSimulatorBarProps {
@@ -15,6 +15,7 @@ export const TimeSimulatorBar: React.FC<TimeSimulatorBarProps> = ({
   const [customTime, setCustomTime] = useState<string>('2026-11-02T09:26:00+05:45');
   const [liveKathmanduTime, setLiveKathmanduTime] = useState<string>('');
   const [statusMsg, setStatusMsg] = useState<string | null>(null);
+  const [isReplaying, setIsReplaying] = useState<boolean>(false);
 
   useEffect(() => {
     const updateLiveClock = () => {
@@ -65,6 +66,21 @@ export const TimeSimulatorBar: React.FC<TimeSimulatorBarProps> = ({
       } catch (err: any) {
         alert(err.message || 'Failed to reset queue');
       }
+    }
+  };
+
+  const handleLoadScenario = async () => {
+    setIsReplaying(true);
+    try {
+      const res = await api.replayScenario(customTime);
+      setMode('simulated');
+      onStateReset?.();
+      onTimeChange?.(customTime);
+      showNotice(res.message);
+    } catch (err: any) {
+      alert(err.message || 'Failed to load scenario');
+    } finally {
+      setIsReplaying(false);
     }
   };
 
@@ -186,8 +202,40 @@ export const TimeSimulatorBar: React.FC<TimeSimulatorBarProps> = ({
                 fontSize: '0.78rem',
               }}
             >
-              <Play size={12} /> Apply
+              <Play size={12} /> Apply Time
             </button>
+
+            <button
+              type="button"
+              disabled={isReplaying}
+              onClick={handleLoadScenario}
+              style={{
+                background: 'linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(99, 102, 241, 0.25))',
+                color: '#38bdf8',
+                border: '1px solid rgba(56, 189, 248, 0.5)',
+                padding: '0.25rem 0.65rem',
+                borderRadius: '4px',
+                cursor: isReplaying ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.3rem',
+                fontSize: '0.78rem',
+                fontWeight: 600,
+              }}
+              title="Loads patients and doctor consultations from clinic.json up to this time"
+            >
+              <Zap size={13} color="#f59e0b" />
+              {isReplaying ? 'Loading...' : 'Load Snapshot Patients'}
+            </button>
+
+            <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.8rem' }}>
+              Active: {isNaN(new Date(customTime).getTime()) ? 'invalid time' : new Intl.DateTimeFormat('en-US', {
+                timeZone: 'Asia/Kathmandu',
+                dateStyle: 'medium',
+                timeStyle: 'medium',
+                hour12: false,
+              }).format(new Date(customTime))}
+            </span>
           </div>
         )}
       </div>

@@ -103,6 +103,60 @@ class ApiService {
     });
     return this.handleResponse<{ success: boolean; message: string }>(res);
   }
+
+  public async replayScenario(untilTime?: string): Promise<{ success: boolean; message: string; count: number }> {
+    try {
+      const res = await fetch(`${API_BASE_URL}/replay`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ until: untilTime }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch {
+      // Fallback to client-side sequential replay
+    }
+
+    // Client-side replay fallback using clinic.json events
+    const clinicModule = await import('../data/clinic.json');
+    const clinicData = clinicModule.default || clinicModule;
+    await this.resetQueue();
+
+    let count = 0;
+    if (clinicData.examples && clinicData.examples.length > 0) {
+      const events: any[] = (clinicData.examples[0] as any).events;
+      for (const event of events) {
+        if (untilTime && event.at > untilTime) break;
+        this.setSimulatedTime(event.at);
+        switch (event.type) {
+          case 'check_in':
+            if (event.patient) await this.checkIn(event.patient);
+            count++;
+            break;
+          case 'call_next':
+            if (event.doctorId) await this.callNext(event.doctorId);
+            count++;
+            break;
+          case 'done':
+            if (event.doctorId) await this.done(event.doctorId);
+            count++;
+            break;
+          case 'no_show':
+            if (event.doctorId) await this.noShow(event.doctorId);
+            count++;
+            break;
+        }
+      }
+    }
+
+    this.setSimulatedTime(untilTime || null);
+    return {
+      success: true,
+      message: `Loaded clinic scenario (${count} events up to ${untilTime?.split('T')[1]?.substring(0, 5) || 'end'})`,
+      count,
+    };
+  }
 }
 
 export const api = new ApiService();

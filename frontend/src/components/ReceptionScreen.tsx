@@ -279,6 +279,7 @@ export const ReceptionScreen: React.FC<ReceptionScreenProps> = ({
                     borderRadius: '6px',
                     fontSize: '0.88rem',
                     outline: 'none',
+                    colorScheme: 'dark',
                     fontFamily: 'var(--font-sans)',
                   }}
                 />
